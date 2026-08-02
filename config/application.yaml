@@ -1,0 +1,19 @@
+application:
+  name: AI-assisted Multi-Cluster Kubernetes Change Validation Platform
+  version: "0.2.0"
+
+execution:
+  mode: pre
+  max_parallel_clusters: 15
+  timeout_seconds: 300
+
+kubernetes:
+  kubeconfig: ~/.kube/config
+
+output:
+  reports_dir: reports
+  json_dir: reports/json
+  html_dir: reports/html
+
+logging:
+  level: INFO
