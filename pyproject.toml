@@ -1,0 +1,10 @@
+[project]
+name = "multi-cluster-kubernetes-validation-platform"
+version = "0.2.0"
+description = "AI-assisted Kubernetes validation platform"
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88

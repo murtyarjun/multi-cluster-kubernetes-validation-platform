@@ -1,0 +1,25 @@
+clusters:
+  - name: demo-eks-prod-east
+    context: demo-eks-prod-east
+    cloud: AWS
+    environment: PROD
+
+  - name: demo-eks-prod-west
+    context: demo-eks-prod-west
+    cloud: AWS
+    environment: PROD
+
+  - name: demo-aks-dev
+    context: demo-aks-dev
+    cloud: Azure
+    environment: DEV
+
+  - name: demo-onprem-stage
+    context: demo-onprem-stage
+    cloud: OnPrem
+    environment: STAGE
+
+  - name: demo-openshift-qa
+    context: demo-openshift-qa
+    cloud: OpenShift
+    environment: QA
