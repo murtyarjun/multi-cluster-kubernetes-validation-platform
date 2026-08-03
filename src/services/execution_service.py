@@ -7,51 +7,42 @@ from src.domain.execution import Execution
 from src.domain.execution_context import ExecutionContext
 from src.planner.execution_planner import ExecutionPlanner
 from src.utils.constants import DEFAULT_CONFIG_FILE
-
+from src.services.inventory_service import InventoryService
 
 class ExecutionService:
     """
-    Coordinates the overall execution flow.
-
-    Responsibilities:
-    - Load application configuration
-    - Create execution context
-    - Discover target clusters
-    - Generate execution plan
-
-    Responsibilities NOT handled here:
-    - CLI parsing
-    - Collector execution
-    - Snapshot generation
-    - HTML reporting
-    - Dashboard updates
+    Coordinates the execution lifecycle.
     """
 
-    def run(self):
+    def execute(self, request):
 
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
         # Load Configuration
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
 
-        print("Loading configuration...")
+        print("\nLoading configuration...")
 
         config = ConfigLoader().load(DEFAULT_CONFIG_FILE)
 
-        print("✓ Configuration loaded.\n")
+        print("✓ Configuration loaded.")
 
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
         # Create Execution
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
 
-        print("Creating execution...")
+        print("\nCreating execution...")
 
         execution = Execution(
-            change_number="CHG-DEMO-001",
-            mode=config.execution.mode.upper(),
+            change_number=request.change_number,
+            mode=request.mode,
             started_at=datetime.now(),
             initiated_by="Arjun",
-            environment="ALL",
-            parallel_workers=15,
+
+            environment=request.environment,
+    requested_groups=request.requested_groups,
+    requested_clusters=request.requested_clusters,
+
+    parallel_workers=request.parallel_workers,
 )
 
         context = ExecutionContext(
@@ -59,36 +50,36 @@ class ExecutionService:
             execution=execution,
         )
 
-        print("✓ Execution initialized.\n")
+        print("✓ Execution initialized.")
 
-        # ------------------------------------------------------------------
-        # Discover Clusters
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
+        # Resolve Target Clusters
+        # -------------------------------------------------------------
 
-        print("Discovering Kubernetes clusters...")
+        print("\nResolving target clusters...")
 
-        provider = ProviderFactory.create()
+        inventory = InventoryService()
 
-        print(f"Cluster Provider : {provider.__class__.__name__}")
+        context.clusters = inventory.get_clusters(
+            request.environment,
+            request.requested_groups,
+        )
 
-        discovery = DiscoveryService(provider)
+        print(f"✓ Selected {len(context.clusters)} target cluster(s).")
 
-        context.clusters = discovery.discover_clusters()
-
-        print()
-
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
         # Build Execution Plan
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
 
         planner = ExecutionPlanner()
 
         context.plan = planner.create_plan(context)
 
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
         # Display Execution Plan
-        # ------------------------------------------------------------------
+        # -------------------------------------------------------------
 
+        print()
         print("=" * 70)
         print("Execution Plan")
         print("=" * 70)
@@ -106,35 +97,35 @@ class ExecutionService:
         print("-" * 70)
 
         print(
-    f"{'#':<4}"
-    f"{'Cluster':<30}"
-    f"{'Platform':<15}"
-    f"{'Environment':<12}"
-    f"{'Group':<15}"
-    f"{'Region'}"
-)
+            f"{'#':<4}"
+            f"{'Cluster':<30}"
+            f"{'Platform':<15}"
+            f"{'Environment':<12}"
+            f"{'Group':<15}"
+            f"{'Region'}"
+        )
+
         print("-" * 90)
 
-        for idx, item in enumerate(context.plan.clusters, start=1):
-            # item is expected to have attributes: name, platform, environment, group, region
+        for idx, cluster in enumerate(context.plan.clusters, start=1):
             print(
                 f"{idx:<4}"
-                f"{getattr(item, 'name', ''):<30}"
-                f"{getattr(item, 'platform', ''):<15}"
-                f"{getattr(item, 'environment', ''):<12}"
-                f"{getattr(item, 'group', ''):<15}"
-                f"{getattr(item, 'region', '')}"
+                f"{cluster.name:<30}"
+                f"{cluster.platform:<15}"
+                f"{cluster.environment:<12}"
+                f"{cluster.group:<15}"
+                f"{cluster.region}"
             )
 
         print("\nCollectors")
         print("-" * 70)
-        print(context.plan.collectors)
+
         if context.plan.collectors:
             for collector in context.plan.collectors:
                 print(f"✓ {collector}")
         else:
             print("No collectors selected.")
 
-        print("\nApplication ready.")
+        print("\nExecution ready.")
 
         return context

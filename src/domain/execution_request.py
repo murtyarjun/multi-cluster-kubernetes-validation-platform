@@ -1,25 +1,23 @@
 from dataclasses import dataclass, field
-from datetime import datetime
-
-from .cluster import Cluster
 
 
 @dataclass
-class Execution:
+class ExecutionRequest:
     """
-    Represents a maintenance validation request
-    entered by the engineer.
+    Represents the user's execution request collected
+    from the interactive console.
     """
 
+    # Required
     change_number: str
     mode: str
-    started_at: datetime
-    initiated_by: str
 
+    # Optional filters
     environment: str = "ALL"
 
     requested_groups: list[str] = field(default_factory=list)
 
     requested_clusters: list[str] = field(default_factory=list)
 
+    # Execution settings
     parallel_workers: int = 15
