@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from pathlib import Path
 
 import yaml
@@ -20,16 +21,14 @@ class DemoProvider(ClusterProvider):
         with inventory.open("r", encoding="utf-8") as stream:
             data = yaml.safe_load(stream)
 
-        clusters = []
-
-        for item in data["clusters"]:
-            clusters.append(
-                Cluster(
-                    name=item["name"],
-                    context=item["context"],
-                    cloud=item["cloud"],
-                    environment=item["environment"],
-                )
+        return [
+            Cluster(
+                name=item["name"],
+                context=item["context"],
+                platform=item["platform"],
+                environment=item["environment"],
+                group=item["group"],
+                region=item["region"],
             )
-
-        return clusters
+            for item in data["clusters"]
+        ]

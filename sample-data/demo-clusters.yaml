@@ -1,25 +1,36 @@
 clusters:
+
   - name: demo-eks-prod-east
     context: demo-eks-prod-east
-    cloud: AWS
+    platform: EKS
     environment: PROD
+    group: Payments
+    region: us-east-1
 
   - name: demo-eks-prod-west
     context: demo-eks-prod-west
-    cloud: AWS
+    platform: EKS
     environment: PROD
+    group: Payments
+    region: us-west-2
 
   - name: demo-aks-dev
     context: demo-aks-dev
-    cloud: Azure
+    platform: AKS
     environment: DEV
+    group: Development
+    region: east-us
 
   - name: demo-onprem-stage
     context: demo-onprem-stage
-    cloud: OnPrem
+    platform: Kubernetes
     environment: STAGE
+    group: Core
+    region: Bangalore
 
   - name: demo-openshift-qa
     context: demo-openshift-qa
-    cloud: OpenShift
+    platform: OpenShift
     environment: QA
+    group: QA
+    region: Hyderabad
